@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31829.152
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NorthwindApiApp", "NorthwindApiApp\NorthwindApiApp.csproj", "{E063E830-1E66-4628-B802-596639EC4216}"
+	ProjectSection(ProjectDependencies) = postProject
+		{364C0A08-1E39-44C5-BCB3-FE9C010C68CA} = {364C0A08-1E39-44C5-BCB3-FE9C010C68CA}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Northwind.Services", "Northwind.Services\Northwind.Services.csproj", "{2CBB6CB9-95C6-4684-8907-083AFE6AEF5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Northwind.Services.EntityFrameworkCore", "Northwind.Services.EntityFrameworkCore\Northwind.Services.EntityFrameworkCore.csproj", "{364C0A08-1E39-44C5-BCB3-FE9C010C68CA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2CBB6CB9-95C6-4684-8907-083AFE6AEF5C} = {2CBB6CB9-95C6-4684-8907-083AFE6AEF5C}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Northwind.DataAccess", "Northwind.DataAccess\Northwind.DataAccess.csproj", "{16BC1BFD-1C63-47FC-B2FD-30DE5753ED8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Northwind.Services.DataAccess", "Northwind.Services.DataAccess\Northwind.Services.DataAccess.csproj", "{2E258D46-4F97-41F4-9B95-7BFAEFE47964}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Northwind.DataAccess.SqlServer", "Northwind.DataAccess.SqlServer\Northwind.DataAccess.SqlServer.csproj", "{88A0D9CE-D492-420D-A9C3-BFC171025D64}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E063E830-1E66-4628-B802-596639EC4216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E063E830-1E66-4628-B802-596639EC4216}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E063E830-1E66-4628-B802-596639EC4216}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E063E830-1E66-4628-B802-596639EC4216}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CBB6CB9-95C6-4684-8907-083AFE6AEF5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CBB6CB9-95C6-4684-8907-083AFE6AEF5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CBB6CB9-95C6-4684-8907-083AFE6AEF5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CBB6CB9-95C6-4684-8907-083AFE6AEF5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{364C0A08-1E39-44C5-BCB3-FE9C010C68CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{364C0A08-1E39-44C5-BCB3-FE9C010C68CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{364C0A08-1E39-44C5-BCB3-FE9C010C68CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{364C0A08-1E39-44C5-BCB3-FE9C010C68CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16BC1BFD-1C63-47FC-B2FD-30DE5753ED8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16BC1BFD-1C63-47FC-B2FD-30DE5753ED8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16BC1BFD-1C63-47FC-B2FD-30DE5753ED8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16BC1BFD-1C63-47FC-B2FD-30DE5753ED8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E258D46-4F97-41F4-9B95-7BFAEFE47964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E258D46-4F97-41F4-9B95-7BFAEFE47964}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E258D46-4F97-41F4-9B95-7BFAEFE47964}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E258D46-4F97-41F4-9B95-7BFAEFE47964}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88A0D9CE-D492-420D-A9C3-BFC171025D64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88A0D9CE-D492-420D-A9C3-BFC171025D64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88A0D9CE-D492-420D-A9C3-BFC171025D64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88A0D9CE-D492-420D-A9C3-BFC171025D64}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9CB7D95F-3275-473A-B455-8830C123540B}
+	EndGlobalSection
+EndGlobal
