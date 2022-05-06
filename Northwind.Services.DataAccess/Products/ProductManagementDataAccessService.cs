@@ -48,8 +48,7 @@ namespace Northwind.Services.DataAccess.Products
                 product = null;
                 return false;
             }
-
-            productTransferObjectTask.Wait();
+            
             product = GetProduct(productTransferObjectTask.Result);
 
             return true;

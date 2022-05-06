@@ -41,8 +41,7 @@ namespace Northwind.Services.DataAccess.Employees
                 bytes = null;
                 return false;
             }
-
-            employeeTask.Wait();
+            
             bytes = employeeTask.Result.Photo;
             return true;
         }

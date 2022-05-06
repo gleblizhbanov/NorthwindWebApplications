@@ -46,6 +46,11 @@ namespace Northwind.DataAccess.SqlServer.Employees
 
         public async Task<bool> DeleteEmployeeAsync(int employeeId)
         {
+            if (employeeId <= 0)
+            {
+                throw new ArgumentException("Must be greater than zero.", nameof(employeeId));
+            }
+
             await using var sqlCommand = new SqlCommand("DeleteEmployee", this.connection)
             {
                 CommandType = CommandType.StoredProcedure,
@@ -89,6 +94,11 @@ namespace Northwind.DataAccess.SqlServer.Employees
 
         public async Task<EmployeeTransferObject> FindEmployeeAsync(int employeeId)
         {
+            if (employeeId <= 0)
+            {
+                throw new ArgumentException("Must be greater than zero.", nameof(employeeId));
+            }
+
             await using var sqlCommand = new SqlCommand("FindEmployee", this.connection)
             {
                 CommandType = CommandType.StoredProcedure,
@@ -113,6 +123,16 @@ namespace Northwind.DataAccess.SqlServer.Employees
 
         public async Task<IList<EmployeeTransferObject>> SelectEmployeesAsync(int offset, int limit)
         {
+            if (offset < 0)
+            {
+                throw new ArgumentException("Must be greater than zero or equals zero.", nameof(offset));
+            }
+
+            if (limit < 1)
+            {
+                throw new ArgumentException("Must be greater than zero.", nameof(limit));
+            }
+
             await using var sqlCommand = new SqlCommand("SelectEmployees", this.connection)
             {
                 CommandType = CommandType.StoredProcedure,

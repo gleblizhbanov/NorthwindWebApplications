@@ -49,8 +49,7 @@ namespace Northwind.Services.DataAccess.Products
                 productCategory = null;
                 return false;
             }
-
-            categoryTask.Wait();
+            
             productCategory = GetProductCategory(categoryTask.Result);
 
             return true;

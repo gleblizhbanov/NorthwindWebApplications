@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Globalization;
 using System.Threading.Tasks;
 using Northwind.DataAccess.Products;
 
@@ -32,11 +31,11 @@ namespace Northwind.DataAccess.SqlServer.Products
                 throw new ArgumentNullException(nameof(productCategory));
             }
 
-            const string commandText =
-@"INSERT INTO dbo.Categories (CategoryName, Description, Picture) OUTPUT Inserted.CategoryID
-VALUES (@categoryName, @description, @picture)";
+            await using var command = new SqlCommand("InsertProductCategory", this.connection)
+            {
+                CommandType = CommandType.StoredProcedure,
+            };
 
-            await using var command = new SqlCommand(commandText, this.connection);
             AddSqlParameters(productCategory, command);
             await this.connection.OpenAsync();
             var id = await command.ExecuteScalarAsync();
@@ -52,11 +51,10 @@ VALUES (@categoryName, @description, @picture)";
                 throw new ArgumentException("Must be greater than zero.", nameof(productCategoryId));
             }
 
-            const string commandText =
-@"DELETE FROM dbo.Categories WHERE CategoryID = @categoryID
-SELECT @@ROWCOUNT";
-
-            await using var command = new SqlCommand(commandText, this.connection);
+            await using var command = new SqlCommand("DeleteProductCategory", this.connection)
+            {
+                CommandType = CommandType.StoredProcedure,
+            };
 
             const string categoryId = "@categoryID";
             command.Parameters.Add(categoryId, SqlDbType.Int);
@@ -76,11 +74,11 @@ SELECT @@ROWCOUNT";
                 throw new ArgumentException("Must be greater than zero.", nameof(productCategoryId));
             }
 
-            const string commandText =
-@"SELECT c.CategoryID, c.CategoryName, c.Description, c.Picture FROM dbo.Categories as c
-WHERE c.CategoryID = @categoryId";
+            await using var command = new SqlCommand("FindProductCategory", this.connection)
+            {
+                CommandType = CommandType.StoredProcedure,
+            };
 
-            await using var command = new SqlCommand(commandText, this.connection);
             const string categoryId = "@categoryId";
             command.Parameters.Add(categoryId, SqlDbType.Int);
             command.Parameters[categoryId].Value = productCategoryId;
@@ -108,14 +106,19 @@ WHERE c.CategoryID = @categoryId";
                 throw new ArgumentException("Must be greater than zero.", nameof(limit));
             }
 
-            const string commandTemplate =
-@"SELECT c.CategoryID, c.CategoryName, c.Description, c.Picture FROM dbo.Categories as c
-ORDER BY c.CategoryID
-OFFSET {0} ROWS
-FETCH FIRST {1} ROWS ONLY";
+            await using var sqlCommand = new SqlCommand("SelectProductCategories", this.connection)
+            {
+                CommandType = CommandType.StoredProcedure,
+            };
 
-            string commandText = string.Format(CultureInfo.CurrentCulture, commandTemplate, offset, limit);
-            return await this.ExecuteReaderAsync(commandText);
+            const string offsetParameter = "@offset";
+            sqlCommand.Parameters.Add(offsetParameter, SqlDbType.Int);
+            sqlCommand.Parameters[offsetParameter].Value = offset;
+            const string limitParameter = "@limit";
+            sqlCommand.Parameters.Add(limitParameter, SqlDbType.Int);
+            sqlCommand.Parameters[limitParameter].Value = limit;
+
+            return await this.ExecuteReaderAsync(sqlCommand);
         }
 
         /// <inheritdoc/>
@@ -131,13 +134,16 @@ FETCH FIRST {1} ROWS ONLY";
                 throw new ArgumentException("Collection is empty.", nameof(productCategoryNames));
             }
 
-            const string commandTemplate =
-@"SELECT c.CategoryID, c.CategoryName, c.Description, c.Picture FROM dbo.Categories as c
-WHERE c.CategoryName in ('{0}')
-ORDER BY c.CategoryID";
+            await using var sqlCommand = new SqlCommand("SelectProductCategoriesByName", this.connection)
+            {
+                CommandType = CommandType.StoredProcedure,
+            };
 
-            string commandText = string.Format(CultureInfo.CurrentCulture, commandTemplate, string.Join("', '", productCategoryNames));
-            return await this.ExecuteReaderAsync(commandText);
+            const string categoriesNamesParameter = "@categoriesNames";
+            sqlCommand.Parameters.Add(categoriesNamesParameter, SqlDbType.NVarChar, 255);
+            sqlCommand.Parameters[categoriesNamesParameter].Value = string.Join(", ", productCategoryNames);
+
+            return await this.ExecuteReaderAsync(sqlCommand);
         }
 
         /// <inheritdoc/>
@@ -148,12 +154,11 @@ ORDER BY c.CategoryID";
                 throw new ArgumentNullException(nameof(productCategory));
             }
 
-            const string commandText =
-@"UPDATE dbo.Categories SET CategoryName = @categoryName, Description = @description, Picture = @picture
-WHERE CategoryID = @categoryId
-SELECT @@ROWCOUNT";
+            await using var command = new SqlCommand("UpdateProductCategory", this.connection)
+            {
+                CommandType = CommandType.StoredProcedure,
+            };
 
-            await using var command = new SqlCommand(commandText, this.connection);
             AddSqlParameters(productCategory, command);
 
             const string categoryId = "@categoryId";
@@ -229,11 +234,10 @@ SELECT @@ROWCOUNT";
             }
         }
 
-        private async Task<IList<ProductCategoryTransferObject>> ExecuteReaderAsync(string commandText)
+        private async Task<IList<ProductCategoryTransferObject>> ExecuteReaderAsync(SqlCommand command)
         {
             var productCategories = new List<ProductCategoryTransferObject>();
-
-            await using var command = new SqlCommand(commandText, this.connection);
+            
             await this.connection.OpenAsync();
             await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
             while (await reader.ReadAsync())

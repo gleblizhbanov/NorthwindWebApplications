@@ -41,8 +41,7 @@ namespace Northwind.Services.DataAccess.Products
                 bytes = null;
                 return false;
             }
-
-            categoryTask.Wait();
+            
             bytes = categoryTask.Result.Picture;
             return true;
         }

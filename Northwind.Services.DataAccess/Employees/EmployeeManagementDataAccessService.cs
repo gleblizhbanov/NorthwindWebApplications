@@ -48,8 +48,7 @@ namespace Northwind.Services.DataAccess.Employees
                 employee = null;
                 return false;
             }
-
-            employeeTransferObjectTask.Wait();
+            
             employee = GetEmployee(employeeTransferObjectTask.Result);
 
             return true;
