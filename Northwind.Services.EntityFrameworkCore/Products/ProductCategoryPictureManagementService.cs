@@ -1,11 +1,13 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Northwind.Services.Products;
+using Northwind.Services.EntityFrameworkCore.Context;
+using Northwind.Services.EntityFrameworkCore.Entities;
 
 namespace Northwind.Services.EntityFrameworkCore.Products
 {
     /// <summary>
-    /// Represents a stub for a product category management service.
+    /// Represents a stub for a product category picture management service.
     /// </summary>
     public class ProductCategoryPictureManagementService : IProductCategoryPictureManagementService
     {
@@ -23,16 +25,21 @@ namespace Northwind.Services.EntityFrameworkCore.Products
         /// <inheritdoc/>
         public async Task<bool> DestroyPictureAsync(int categoryId)
         {
-            var category = await this.context.FindAsync<ProductCategory>(categoryId);
+            var category = await this.context.FindAsync<Category>(categoryId).ConfigureAwait(false);
+            if (category is null)
+            {
+                return false;
+            }
+
             category.Picture = null;
             this.context.Update(category);
-            return await this.context.SaveChangesAsync() > 0;
+            return await this.context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
 
         /// <inheritdoc/>
         public bool TryShowPicture(int categoryId, out byte[] bytes)
         {
-            var category = this.context.Find<ProductCategory>(categoryId);
+            var category = this.context.Find<Category>(categoryId);
             if (category is null)
             {
                 bytes = null;
@@ -46,17 +53,17 @@ namespace Northwind.Services.EntityFrameworkCore.Products
         /// <inheritdoc/>
         public async Task<bool> UpdatePictureAsync(int categoryId, Stream stream)
         {
-            var category = await this.context.FindAsync<ProductCategory>(categoryId);
+            var category = await this.context.FindAsync<Category>(categoryId).ConfigureAwait(false);
             if (category is null)
             {
                 return false;
             }
 
             await using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
+            await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
             category.Picture = memoryStream.ToArray();
-
-            return true;
+            this.context.Update(category);
+            return await this.context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
     }
 }

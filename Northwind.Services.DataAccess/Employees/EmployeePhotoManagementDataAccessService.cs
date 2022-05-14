@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Northwind.DataAccess;
 using Northwind.DataAccess.Employees;
@@ -14,7 +16,7 @@ namespace Northwind.Services.DataAccess.Employees
         private readonly IEmployeeDataAccessObject employeeDataAccessObject;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="EmployeePhotoManagementDataAccessService"/> class.
+        /// Initializes a new instance of the <see cref="EmployeePhotoManagementDataAccessService"/> class.
         /// </summary>
         /// <param name="dataAccessFactory">A Northwind data access factory.</param>
         public EmployeePhotoManagementDataAccessService(NorthwindDataAccessFactory dataAccessFactory)
@@ -25,24 +27,22 @@ namespace Northwind.Services.DataAccess.Employees
         /// <inheritdoc/>
         public bool TryShowPhoto(int employeeId, out byte[] bytes)
         {
-            Task<EmployeeTransferObject> employeeTask;
+            var employeeTask = this.employeeDataAccessObject.FindEmployeeAsync(employeeId);
             try
             {
-                employeeTask = this.employeeDataAccessObject.FindEmployeeAsync(employeeId);
+                bytes = employeeTask.Result.Photo;
             }
-            catch (EmployeeNotFoundException)
+            catch (AggregateException ex)
             {
-                bytes = null;
-                return false;
+                if (ex.InnerExceptions.Any(e => e.GetType() == typeof(EmployeeNotFoundException)))
+                {
+                    bytes = null;
+                    return false;
+                }
+
+                throw;
             }
 
-            if (employeeTask is null)
-            {
-                bytes = null;
-                return false;
-            }
-            
-            bytes = employeeTask.Result.Photo;
             return true;
         }
 
@@ -52,7 +52,7 @@ namespace Northwind.Services.DataAccess.Employees
             EmployeeTransferObject employee;
             try
             {
-                employee = await this.employeeDataAccessObject.FindEmployeeAsync(employeeId);
+                employee = await this.employeeDataAccessObject.FindEmployeeAsync(employeeId).ConfigureAwait(false);
             }
             catch (EmployeeNotFoundException)
             {
@@ -65,9 +65,9 @@ namespace Northwind.Services.DataAccess.Employees
             }
 
             await using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
+            await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
             employee.Photo = memoryStream.ToArray();
-            return await this.employeeDataAccessObject.UpdateEmployeeAsync(employee);
+            return await this.employeeDataAccessObject.UpdateEmployeeAsync(employee).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -76,7 +76,7 @@ namespace Northwind.Services.DataAccess.Employees
             EmployeeTransferObject employee;
             try
             {
-                employee = await this.employeeDataAccessObject.FindEmployeeAsync(employeeId);
+                employee = await this.employeeDataAccessObject.FindEmployeeAsync(employeeId).ConfigureAwait(false);
             }
             catch (EmployeeNotFoundException)
             {

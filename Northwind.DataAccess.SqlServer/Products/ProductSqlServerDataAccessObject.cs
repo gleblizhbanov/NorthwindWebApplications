@@ -40,9 +40,9 @@ namespace Northwind.DataAccess.SqlServer.Products
 
             AddSqlParameters(product, command);
 
-            await this.connection.OpenAsync();
-            var id = await command.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var id = await command.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
             return (int)id;
         }
 
@@ -63,9 +63,9 @@ namespace Northwind.DataAccess.SqlServer.Products
             command.Parameters.Add(productIdParameter, SqlDbType.Int);
             command.Parameters[productIdParameter].Value = productId;
 
-            await this.connection.OpenAsync();
-            var result = await command.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
             return (int)result > 0;
         }
 
@@ -86,9 +86,9 @@ namespace Northwind.DataAccess.SqlServer.Products
             command.Parameters.Add(productIdParameter, SqlDbType.Int);
             command.Parameters[productIdParameter].Value = productId;
 
-            await this.connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-            if (!await reader.ReadAsync())
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+            if (!await reader.ReadAsync().ConfigureAwait(false))
             {
                 throw new ProductNotFoundException(productId);
             }
@@ -121,7 +121,7 @@ namespace Northwind.DataAccess.SqlServer.Products
             sqlCommand.Parameters.Add(limitParameter, SqlDbType.Int);
             sqlCommand.Parameters[limitParameter].Value = limit;
 
-            return await this.ExecuteReaderAsync(sqlCommand);
+            return await this.ExecuteReaderAsync(sqlCommand).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -147,7 +147,7 @@ namespace Northwind.DataAccess.SqlServer.Products
             sqlCommand.Parameters.Add(productNamesParameter, SqlDbType.NVarChar, 255);
             sqlCommand.Parameters[productNamesParameter].Value = string.Join(", ", productNames);
 
-            return await this.ExecuteReaderAsync(sqlCommand);
+            return await this.ExecuteReaderAsync(sqlCommand).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -162,16 +162,16 @@ namespace Northwind.DataAccess.SqlServer.Products
             {
                 CommandType = CommandType.StoredProcedure,
             };
-            
+
             AddSqlParameters(product, command);
 
             const string productId = "@productId";
             command.Parameters.Add(productId, SqlDbType.Int);
-            command.Parameters[productId].Value = product.Id;
+            command.Parameters[productId].Value = product.ProductId;
 
-            await this.connection.OpenAsync();
-            var result = await command.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
             return (int)result > 0;
         }
 
@@ -194,9 +194,9 @@ namespace Northwind.DataAccess.SqlServer.Products
             sqlCommand.Parameters.Add(productCategoriesParameter, SqlDbType.NVarChar, 255);
             sqlCommand.Parameters[productCategoriesParameter].Value = whereInClause;
             var products = new List<ProductTransferObject>();
-            await this.connection.OpenAsync();
-            await using var reader = await sqlCommand.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-            while (await reader.ReadAsync())
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            await using var reader = await sqlCommand.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 products.Add(CreateProduct(reader));
             }
@@ -298,8 +298,8 @@ namespace Northwind.DataAccess.SqlServer.Products
 
             return new ProductTransferObject
             {
-                Id = id,
-                Name = name,
+                ProductId = id,
+                ProductName = name,
                 SupplierId = supplierId,
                 CategoryId = categoryId,
                 QuantityPerUnit = quantityPerUnit,
@@ -315,7 +315,7 @@ namespace Northwind.DataAccess.SqlServer.Products
         {
             const string productNameParameter = "@productName";
             command.Parameters.Add(productNameParameter, SqlDbType.NVarChar, 40);
-            command.Parameters[productNameParameter].Value = product.Name;
+            command.Parameters[productNameParameter].Value = product.ProductName;
 
             const string supplierIdParameter = "@supplierId";
             command.Parameters.Add(supplierIdParameter, SqlDbType.Int);
@@ -416,9 +416,9 @@ namespace Northwind.DataAccess.SqlServer.Products
         private async Task<IList<ProductTransferObject>> ExecuteReaderAsync(SqlCommand command)
         {
             var products = new List<ProductTransferObject>();
-            await this.connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-            while (await reader.ReadAsync())
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 products.Add(CreateProduct(reader));
             }

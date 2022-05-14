@@ -23,6 +23,7 @@ namespace Northwind.DataAccess.SqlServer.Employees
             this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
+        /// <inheritdoc/>
         public async Task<int> InsertEmployeeAsync(EmployeeTransferObject employee)
         {
             if (employee is null)
@@ -32,18 +33,19 @@ namespace Northwind.DataAccess.SqlServer.Employees
 
             await using var sqlCommand = new SqlCommand("InsertEmployee", this.connection)
             {
-                CommandType = CommandType.StoredProcedure
+                CommandType = CommandType.StoredProcedure,
             };
 
             AddSqlParameters(sqlCommand, employee);
 
-            await this.connection.OpenAsync();
-            var id = await sqlCommand.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var id = await sqlCommand.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
 
             return (int)id;
         }
 
+        /// <inheritdoc/>
         public async Task<bool> DeleteEmployeeAsync(int employeeId)
         {
             if (employeeId <= 0)
@@ -60,13 +62,14 @@ namespace Northwind.DataAccess.SqlServer.Employees
             sqlCommand.Parameters.Add(employeeIdParameter, SqlDbType.Int);
             sqlCommand.Parameters[employeeIdParameter].Value = employeeId;
 
-            await this.connection.OpenAsync();
-            var result = await sqlCommand.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var result = await sqlCommand.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
 
             return (int)result > 0;
         }
 
+        /// <inheritdoc/>
         public async Task<bool> UpdateEmployeeAsync(EmployeeTransferObject employee)
         {
             if (employee is null)
@@ -76,22 +79,23 @@ namespace Northwind.DataAccess.SqlServer.Employees
 
             await using var sqlCommand = new SqlCommand("UpdateEmployee", this.connection)
             {
-                CommandType = CommandType.StoredProcedure
+                CommandType = CommandType.StoredProcedure,
             };
 
             const string employeeIdParameter = "@employeeId";
             sqlCommand.Parameters.Add(employeeIdParameter, SqlDbType.Int);
-            sqlCommand.Parameters[employeeIdParameter].Value = employee.Id;
+            sqlCommand.Parameters[employeeIdParameter].Value = employee.EmployeeId;
 
             AddSqlParameters(sqlCommand, employee);
 
-            await this.connection.OpenAsync();
-            var result = await sqlCommand.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var result = await sqlCommand.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
 
             return (int)result > 0;
         }
 
+        /// <inheritdoc/>
         public async Task<EmployeeTransferObject> FindEmployeeAsync(int employeeId)
         {
             if (employeeId <= 0)
@@ -108,10 +112,10 @@ namespace Northwind.DataAccess.SqlServer.Employees
             sqlCommand.Parameters.Add(employeeIdParameter, SqlDbType.Int);
             sqlCommand.Parameters[employeeIdParameter].Value = employeeId;
 
-            await this.connection.OpenAsync();
-            var reader = await sqlCommand.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            await using var reader = await sqlCommand.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
 
-            if (!await reader.ReadAsync())
+            if (!await reader.ReadAsync().ConfigureAwait(false))
             {
                 throw new EmployeeNotFoundException(employeeId);
             }
@@ -121,6 +125,7 @@ namespace Northwind.DataAccess.SqlServer.Employees
             return employee;
         }
 
+        /// <inheritdoc/>
         public async Task<IList<EmployeeTransferObject>> SelectEmployeesAsync(int offset, int limit)
         {
             if (offset < 0)
@@ -147,9 +152,9 @@ namespace Northwind.DataAccess.SqlServer.Employees
             sqlCommand.Parameters[limitParameter].Value = limit;
 
             var employees = new List<EmployeeTransferObject>();
-            await this.connection.OpenAsync();
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            await using var reader = await sqlCommand.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 employees.Add(BuildEmployee(reader));
             }
@@ -247,7 +252,7 @@ namespace Northwind.DataAccess.SqlServer.Employees
         {
             return new EmployeeTransferObject()
             {
-                Id = (int)reader["EmployeeId"],
+                EmployeeId = (int)reader["EmployeeId"],
                 LastName = (string)reader["LastName"],
                 FirstName = (string)reader["FirstName"],
                 Title = (string)(reader["Title"] != DBNull.Value ? reader["Title"] : null),

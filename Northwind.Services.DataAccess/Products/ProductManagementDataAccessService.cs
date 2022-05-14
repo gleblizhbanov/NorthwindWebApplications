@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Northwind.DataAccess;
 using Northwind.DataAccess.Products;
+using Northwind.Services.Models;
 using Northwind.Services.Products;
 
 namespace Northwind.Services.DataAccess.Products
@@ -15,7 +17,7 @@ namespace Northwind.Services.DataAccess.Products
         private readonly IProductDataAccessObject productDataAccessObject;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ProductManagementDataAccessService"/> class.
+        /// Initializes a new instance of the <see cref="ProductManagementDataAccessService"/> class.
         /// </summary>
         /// <param name="dataAccessFactory">A Northwind data access factory.</param>
         public ProductManagementDataAccessService(NorthwindDataAccessFactory dataAccessFactory)
@@ -26,30 +28,29 @@ namespace Northwind.Services.DataAccess.Products
         /// <inheritdoc/>
         public async Task<IList<Product>> ShowProductsAsync(int offset, int limit)
         {
-            return (await this.productDataAccessObject.SelectProductsAsync(offset, limit)).Select(GetProduct).ToList();
+            return (await this.productDataAccessObject.SelectProductsAsync(offset, limit).ConfigureAwait(false))
+                                                      .Select(GetProduct)
+                                                      .ToList();
         }
 
         /// <inheritdoc/>
         public bool TryShowProduct(int productId, out Product product)
         {
-            Task<ProductTransferObject> productTransferObjectTask;
+            var productTransferObjectTask = this.productDataAccessObject.FindProductAsync(productId);
             try
             {
-                productTransferObjectTask = this.productDataAccessObject.FindProductAsync(productId);
+                product = GetProduct(productTransferObjectTask.Result);
             }
-            catch (ProductNotFoundException)
+            catch (AggregateException ex)
             {
-                product = null;
-                return false;
-            }
+                if (ex.InnerExceptions.Any(e => e.GetType() == typeof(ProductNotFoundException)))
+                {
+                    product = null;
+                    return false;
+                }
 
-            if (productTransferObjectTask is null)
-            {
-                product = null;
-                return false;
+                throw;
             }
-            
-            product = GetProduct(productTransferObjectTask.Result);
 
             return true;
         }
@@ -57,31 +58,35 @@ namespace Northwind.Services.DataAccess.Products
         /// <inheritdoc/>
         public async Task<int> CreateProductAsync(Product product)
         {
-            return await this.productDataAccessObject.InsertProductAsync(GetProductTransferObject(product));
+            return await this.productDataAccessObject.InsertProductAsync(GetProductTransferObject(product)).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public async Task<bool> DestroyProductAsync(int productId)
         {
-            return await this.productDataAccessObject.DeleteProductAsync(productId);
+            return await this.productDataAccessObject.DeleteProductAsync(productId).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public async Task<IList<Product>> LookupProductsByNameAsync(IList<string> names)
         {
-            return (await this.productDataAccessObject.SelectProductsByNameAsync(names)).Select(GetProduct).ToList();
+            return (await this.productDataAccessObject.SelectProductsByNameAsync(names).ConfigureAwait(false))
+                                                      .Select(GetProduct)
+                                                      .ToList();
         }
 
         /// <inheritdoc/>
         public async Task<bool> UpdateProductAsync(int productId, Product product)
         {
-            return await this.productDataAccessObject.UpdateProductAsync(GetProductTransferObject(product));
+            return await this.productDataAccessObject.UpdateProductAsync(GetProductTransferObject(product)).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public async Task<IList<Product>> ShowProductsForCategoryAsync(int categoryId)
         {
-            return (await this.productDataAccessObject.SelectProductByCategoryAsync(new[] {categoryId})).Select(GetProduct).ToList();
+            return (await this.productDataAccessObject.SelectProductByCategoryAsync(new[] { categoryId }).ConfigureAwait(false))
+                                                      .Select(GetProduct)
+                                                      .ToList();
         }
 
         private static Product GetProduct(ProductTransferObject product) =>
@@ -89,8 +94,8 @@ namespace Northwind.Services.DataAccess.Products
             {
                 CategoryId = product.CategoryId,
                 Discontinued = product.Discontinued,
-                Id = product.Id,
-                Name = product.Name,
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
                 QuantityPerUnit = product.QuantityPerUnit,
                 ReorderLevel = product.ReorderLevel,
                 SupplierId = product.CategoryId,
@@ -104,8 +109,8 @@ namespace Northwind.Services.DataAccess.Products
             {
                 CategoryId = product.CategoryId,
                 Discontinued = product.Discontinued,
-                Id = product.Id,
-                Name = product.Name,
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
                 QuantityPerUnit = product.QuantityPerUnit,
                 ReorderLevel = product.ReorderLevel,
                 SupplierId = product.CategoryId,

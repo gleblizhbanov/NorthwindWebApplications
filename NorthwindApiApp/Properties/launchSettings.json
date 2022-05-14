@@ -13,6 +13,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
+        "SQLCONNSTR_NORTHWIND_BLOGGING": "data source=(localdb)\\MSSQLLocalDB; Integrated Security=True; Initial Catalog=NorthwindBlogging;",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

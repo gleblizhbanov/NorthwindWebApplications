@@ -10,7 +10,7 @@ namespace Northwind.DataAccess.Employees
         /// <summary>
         /// Gets or sets an employee identifier.
         /// </summary>
-        public int Id { get; set; }
+        public int EmployeeId { get; set; }
 
         /// <summary>
         /// Gets or sets an employee last name.

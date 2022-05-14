@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Northwind.DataAccess;
 using Northwind.DataAccess.Products;
+using Northwind.Services.Models;
 using Northwind.Services.Products;
 
 namespace Northwind.Services.DataAccess.Products
@@ -16,7 +17,7 @@ namespace Northwind.Services.DataAccess.Products
         private readonly IProductCategoryDataAccessObject productCategoryDataAccessObject;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ProductCategoryPicturesManagementDataAccessService"/> class.
+        /// Initializes a new instance of the <see cref="ProductCategoriesManagementDataAccessService"/> class.
         /// </summary>
         /// <param name="dataAccessFactory">A Northwind data access factory.</param>
         public ProductCategoriesManagementDataAccessService(NorthwindDataAccessFactory dataAccessFactory)
@@ -25,80 +26,81 @@ namespace Northwind.Services.DataAccess.Products
         }
 
         /// <inheritdoc/>
-        public async Task<IList<ProductCategory>> ShowCategoriesAsync(int offset, int limit)
+        public async Task<IList<Category>> ShowCategoriesAsync(int offset, int limit)
         {
-            return (await this.productCategoryDataAccessObject.SelectProductCategoriesAsync(offset, limit)).Select(GetProductCategory).ToList();
+            return (await this.productCategoryDataAccessObject.SelectProductCategoriesAsync(offset, limit).ConfigureAwait(false))
+                                                              .Select(GetCategory)
+                                                              .ToList();
         }
 
         /// <inheritdoc/>
-        public bool TryShowCategory(int categoryId, out ProductCategory productCategory)
+        public bool TryShowCategory(int categoryId, out Category category)
         {
-            Task<ProductCategoryTransferObject> categoryTask;
+            var categoryTask = this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId);
             try
             {
-                categoryTask = this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId);
+                category = GetCategory(categoryTask.Result);
             }
-            catch (ProductCategoryNotFoundException)
+            catch (AggregateException ex)
             {
-                productCategory = null;
-                return false;
-            }
+                if (ex.InnerExceptions.Any(e => e.GetType() == typeof(ProductCategoryNotFoundException)))
+                {
+                    category = null;
+                    return false;
+                }
 
-            if (categoryTask is null)
-            {
-                productCategory = null;
-                return false;
+                throw;
             }
-            
-            productCategory = GetProductCategory(categoryTask.Result);
 
             return true;
         }
 
         /// <inheritdoc/>
-        public async Task<int> CreateCategoryAsync(ProductCategory productCategory)
+        public async Task<int> CreateCategoryAsync(Category category)
         {
-            if (productCategory is null)
+            if (category is null)
             {
-                throw new ArgumentNullException(nameof(productCategory));
+                throw new ArgumentNullException(nameof(category));
             }
 
-            return await this.productCategoryDataAccessObject.InsertProductCategoryAsync(GetProductCategoryDataTransferObject(productCategory));
+            return await this.productCategoryDataAccessObject.InsertProductCategoryAsync(GetCategoryDataTransferObject(category)).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public async Task<bool> DestroyCategoryAsync(int categoryId)
         {
-            return await this.productCategoryDataAccessObject.DeleteProductCategoryAsync(categoryId);
+            return await this.productCategoryDataAccessObject.DeleteProductCategoryAsync(categoryId).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        public async Task<IList<ProductCategory>> LookupCategoriesByNameAsync(IList<string> names)
+        public async Task<IList<Category>> LookupCategoriesByNameAsync(IList<string> names)
         {
-            return (await this.productCategoryDataAccessObject.SelectProductCategoriesByNameAsync(names)).Select(GetProductCategory).ToList();
+            return (await this.productCategoryDataAccessObject.SelectProductCategoriesByNameAsync(names).ConfigureAwait(false))
+                                                              .Select(GetCategory)
+                                                              .ToList();
         }
 
         /// <inheritdoc/>
-        public async Task<bool> UpdateCategoryAsync(int categoryId, ProductCategory productCategory)
+        public async Task<bool> UpdateCategoryAsync(int categoryId, Category category)
         {
-            return await this.productCategoryDataAccessObject.UpdateProductCategoryAsync(GetProductCategoryDataTransferObject(productCategory));
+            return await this.productCategoryDataAccessObject.UpdateProductCategoryAsync(GetCategoryDataTransferObject(category)).ConfigureAwait(false);
         }
 
-        private static ProductCategory GetProductCategory(ProductCategoryTransferObject category) =>
-            new()
+        private static Category GetCategory(ProductCategoryTransferObject category) =>
+            new ()
             {
                 Description = category.Description,
-                Id = category.Id,
-                Name = category.Name,
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName,
                 Picture = category.Picture,
             };
 
-        private static ProductCategoryTransferObject GetProductCategoryDataTransferObject(ProductCategory category) =>
-            new()
+        private static ProductCategoryTransferObject GetCategoryDataTransferObject(Category category) =>
+            new ()
             {
                 Description = category.Description,
-                Id = category.Id,
-                Name = category.Name,
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName,
                 Picture = category.Picture,
             };
     }

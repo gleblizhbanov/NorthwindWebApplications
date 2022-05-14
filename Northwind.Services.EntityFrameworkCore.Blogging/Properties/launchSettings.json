@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Northwind.Services.EntityFrameworkCore.Blogging": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Northwind.Services.Products;
+using Northwind.Services.EntityFrameworkCore.Context;
+using Northwind.Services.EntityFrameworkCore.Entities;
 
 namespace Northwind.Services.EntityFrameworkCore.Products
 {
@@ -22,57 +24,81 @@ namespace Northwind.Services.EntityFrameworkCore.Products
         }
 
         /// <inheritdoc/>
-        public async Task<int> CreateCategoryAsync(ProductCategory productCategory)
+        public async Task<int> CreateCategoryAsync(Models.Category category)
         {
-            var entityEntry = await this.context.AddAsync(productCategory);
-            await this.context.SaveChangesAsync();
-            return entityEntry.Entity.Id;
+            var entityEntry = await this.context.AddAsync(GetCategoryEntity(category)).ConfigureAwait(false);
+            await this.context.SaveChangesAsync().ConfigureAwait(false);
+            return entityEntry.Entity.CategoryId;
         }
 
         /// <inheritdoc/>
         public async Task<bool> DestroyCategoryAsync(int categoryId)
         {
-            var category = await this.context.FindAsync<ProductCategory>(categoryId);
+            var category = await this.context.FindAsync<Category>(categoryId).ConfigureAwait(false);
             this.context.Remove(category);
-            return await this.context.SaveChangesAsync() > 0;
+            return await this.context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
 
         /// <inheritdoc/>
-        public async Task<IList<ProductCategory>> LookupCategoriesByNameAsync(IList<string> names)
-        {
-            return this.context.Categories.Where(category => names.Contains(category.Name)).ToList();
-        }
+        public async Task<IList<Models.Category>> LookupCategoriesByNameAsync(IList<string> names) =>
+            this.context.Categories.Where(category => names.Contains(category.CategoryName))
+                                   .AsEnumerable()
+                                   .Select(GetCategoryModel)
+                                   .ToList();
 
         /// <inheritdoc/>
-        public async Task<IList<ProductCategory>> ShowCategoriesAsync(int offset, int limit)
+        public async Task<IList<Models.Category>> ShowCategoriesAsync(int offset, int limit) =>
+            limit != int.MaxValue
+                ? this.context.Categories.Skip(offset).Take(limit).AsEnumerable().Select(GetCategoryModel).ToList()
+                : this.context.Categories.Skip(limit).AsEnumerable().Select(GetCategoryModel).ToList();
+
+        /// <inheritdoc/>
+        public bool TryShowCategory(int categoryId, out Models.Category category)
         {
-            var categories = this.context.Categories.Skip(offset);
-            if (limit != -1)
+            var categoryEntity = this.context.Find<Category>(categoryId);
+            if (categoryEntity is null)
             {
-                categories = categories.Take(limit);
+                category = null;
+                return false;
             }
 
-            return categories.ToList();
+            category = GetCategoryModel(categoryEntity);
+            return true;
         }
 
         /// <inheritdoc/>
-        public bool TryShowCategory(int categoryId, out ProductCategory productCategory)
+        public async Task<bool> UpdateCategoryAsync(int categoryId, Models.Category productCategory)
         {
-            productCategory = this.context.Find<ProductCategory>(categoryId);
-            return productCategory is not null;
-        }
-
-        /// <inheritdoc/>
-        public async Task<bool> UpdateCategoryAsync(int categoryId, ProductCategory productCategory)
-        {
-            if (!this.TryShowCategory(categoryId, out var category))
+            var category = await this.context.FindAsync<Category>(categoryId).ConfigureAwait(false);
+            if (category is null)
             {
                 return false;
             }
 
-            this.context.Entry(category).CurrentValues.SetValues(productCategory);
+            category.CategoryId = productCategory.CategoryId;
+            category.CategoryName = productCategory.CategoryName;
+            category.Description = productCategory.Description;
+            category.Picture = productCategory.Picture;
             this.context.Update(category);
-            return await this.context.SaveChangesAsync() > 0;
+            return await this.context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
+
+        private static Category GetCategoryEntity(Models.Category category) =>
+            new ()
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName,
+                Description = category.Description,
+                Picture = category.Picture,
+            };
+
+        private static Models.Category GetCategoryModel(Category category) =>
+            new ()
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName,
+                Description = category.Description,
+                Picture = category.Picture,
+            };
     }
 }

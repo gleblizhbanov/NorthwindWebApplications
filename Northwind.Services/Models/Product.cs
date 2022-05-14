@@ -1,4 +1,4 @@
-﻿namespace Northwind.Services.Products
+﻿namespace Northwind.Services.Models
 {
     /// <summary>
     /// Represents a product.
@@ -8,12 +8,12 @@
         /// <summary>
         /// Gets or sets a product identifier.
         /// </summary>
-        public int Id { get; set; }
+        public int ProductId { get; set; }
 
         /// <summary>
         /// Gets or sets a product name.
         /// </summary>
-        public string Name { get; set; }
+        public string ProductName { get; set; }
 
         /// <summary>
         /// Gets or sets a supplier identifier.

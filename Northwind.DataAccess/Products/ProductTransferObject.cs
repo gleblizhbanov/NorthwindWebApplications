@@ -5,18 +5,18 @@ namespace Northwind.DataAccess.Products
     /// <summary>
     /// Represents a TO for Northwind products.
     /// </summary>
-    [DebuggerDisplay("Id={Id}, Name={Name}")]
+    [DebuggerDisplay("CategoryId={ProductId}, ProductName={ProductName}")]
     public sealed class ProductTransferObject
     {
         /// <summary>
         /// Gets or sets a product identifier.
         /// </summary>
-        public int Id { get; set; }
+        public int ProductId { get; set; }
 
         /// <summary>
         /// Gets or sets a product name.
         /// </summary>
-        public string Name { get; set; }
+        public string ProductName { get; set; }
 
         /// <summary>
         /// Gets or sets a supplier identifier.

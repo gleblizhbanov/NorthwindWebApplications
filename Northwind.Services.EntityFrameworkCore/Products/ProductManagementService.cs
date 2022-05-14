@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Northwind.Services.Products;
+using Northwind.Services.EntityFrameworkCore.Context;
+using Northwind.Services.EntityFrameworkCore.Entities;
 
 namespace Northwind.Services.EntityFrameworkCore.Products
 {
@@ -23,63 +24,106 @@ namespace Northwind.Services.EntityFrameworkCore.Products
         }
 
         /// <inheritdoc/>
-        public async Task<int> CreateProductAsync(Product product)
+        public async Task<int> CreateProductAsync(Models.Product product)
         {
-            var entityEntry = await this.context.AddAsync(product);
-            await this.context.SaveChangesAsync();
-            return entityEntry.Entity.Id;
+            var entityEntry = await this.context.AddAsync(GetProductEntity(product)).ConfigureAwait(false);
+            await this.context.SaveChangesAsync().ConfigureAwait(false);
+            return entityEntry.Entity.ProductId;
         }
 
         /// <inheritdoc/>
         public async Task<bool> DestroyProductAsync(int productId)
         {
-            var product = await this.context.FindAsync<Product>(productId);
+            var product = await this.context.FindAsync<Product>(productId).ConfigureAwait(false);
             this.context.Remove(product);
-            return await this.context.SaveChangesAsync() > 0;
+            return await this.context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
 
         /// <inheritdoc/>
-        public async Task<IList<Product>> LookupProductsByNameAsync(IList<string> names)
-        {
-            return await this.context.Products.Where(product => names.Contains(product.Name)).ToListAsync();
-        }
+        public async Task<IList<Models.Product>> LookupProductsByNameAsync(IList<string> names) => 
+            this.context.Products.Where(product => names.Contains(product.ProductName))
+                                 .AsEnumerable()
+                                 .Select(GetProductModel)
+                                 .ToList();
 
         /// <inheritdoc/>
-        public async Task<IList<Product>> ShowProductsAsync(int offset, int limit)
+        public async Task<IList<Models.Product>> ShowProductsAsync(int offset, int limit) =>
+            limit != int.MaxValue
+                ? this.context.Products.Skip(offset).Take(limit).AsEnumerable().Select(GetProductModel).ToList()
+                : this.context.Products.Skip(offset).AsEnumerable().Select(GetProductModel).ToList();
+
+        /// <inheritdoc/>
+        public async Task<IList<Models.Product>> ShowProductsForCategoryAsync(int categoryId) =>
+            this.context.Products.Where(p => p.CategoryId == categoryId)
+                                 .AsEnumerable()
+                                 .Select(GetProductModel)
+                                 .ToList();
+
+        /// <inheritdoc/>
+        public bool TryShowProduct(int productId, out Models.Product product)
         {
-            var products = this.context.Products.Skip(offset);
-            if (limit != -1)
+            var productEntity = this.context.Find<Product>(productId);
+            if (productEntity is null)
             {
-                products = products.Skip(limit);
+                product = null;
+                return false;
             }
 
-            return await products.ToListAsync();
+            product = GetProductModel(productEntity);
+            return true;
         }
 
         /// <inheritdoc/>
-        public async Task<IList<Product>> ShowProductsForCategoryAsync(int categoryId)
+        public async Task<bool> UpdateProductAsync(int productId, Models.Product product)
         {
-            return await this.context.Products.Where(p => p.CategoryId == categoryId).ToListAsync();
-        }
-
-        /// <inheritdoc/>
-        public bool TryShowProduct(int productId, out Product product)
-        {
-            product = this.context.Find<Product>(productId);
-            return product is not null;
-        }
-
-        /// <inheritdoc/>
-        public async Task<bool> UpdateProductAsync(int productId, Product product)
-        {
-            if (!this.TryShowProduct(productId, out var oldProduct))
+            var productEntity = await this.context.FindAsync<Product>(productId).ConfigureAwait(false);
+            if (productEntity is null)
             {
                 return false;
             }
 
-            this.context.Entry(oldProduct).CurrentValues.SetValues(productId);
-            this.context.Update(oldProduct);
-            return await this.context.SaveChangesAsync() > 0;
+            productEntity.CategoryId = product.CategoryId;
+            productEntity.Discontinued = product.Discontinued;
+            productEntity.ProductId = product.ProductId;
+            productEntity.ProductName = product.ProductName;
+            productEntity.QuantityPerUnit = product.QuantityPerUnit;
+            productEntity.ReorderLevel = product.ReorderLevel;
+            productEntity.SupplierId = product.CategoryId;
+            productEntity.UnitPrice = product.UnitPrice;
+            productEntity.UnitsInStock = product.UnitsInStock;
+            productEntity.UnitsOnOrder = product.UnitsOnOrder;
+            this.context.Update(productEntity);
+            return await this.context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
+
+        private static Models.Product GetProductModel(Product product) =>
+            new()
+            {
+                CategoryId = product.CategoryId,
+                Discontinued = product.Discontinued,
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                QuantityPerUnit = product.QuantityPerUnit,
+                ReorderLevel = product.ReorderLevel,
+                SupplierId = product.CategoryId,
+                UnitPrice = product.UnitPrice,
+                UnitsInStock = product.UnitsInStock,
+                UnitsOnOrder = product.UnitsOnOrder,
+            };
+
+        private static Product GetProductEntity(Models.Product product) =>
+            new()
+            {
+                CategoryId = product.CategoryId,
+                Discontinued = product.Discontinued,
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                QuantityPerUnit = product.QuantityPerUnit,
+                ReorderLevel = product.ReorderLevel,
+                SupplierId = product.CategoryId,
+                UnitPrice = product.UnitPrice,
+                UnitsInStock = product.UnitsInStock,
+                UnitsOnOrder = product.UnitsOnOrder,
+            };
     }
 }

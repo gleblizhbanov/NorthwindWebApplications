@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Northwind.Services.Employees
+namespace Northwind.Services.Models
 {
     /// <summary>
     /// Represents an employee.
@@ -10,7 +10,7 @@ namespace Northwind.Services.Employees
         /// <summary>
         /// Gets or sets an employee identifier.
         /// </summary>
-        public int Id { get; set; }
+        public int EmployeeId { get; set; }
 
         /// <summary>
         /// Gets or sets an employee last name.

@@ -37,9 +37,9 @@ namespace Northwind.DataAccess.SqlServer.Products
             };
 
             AddSqlParameters(productCategory, command);
-            await this.connection.OpenAsync();
-            var id = await command.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var id = await command.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
             return (int)id;
         }
 
@@ -59,10 +59,10 @@ namespace Northwind.DataAccess.SqlServer.Products
             const string categoryId = "@categoryID";
             command.Parameters.Add(categoryId, SqlDbType.Int);
             command.Parameters[categoryId].Value = productCategoryId;
-            
-            await this.connection.OpenAsync();
-            var result = await command.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
             return (int)result > 0;
         }
 
@@ -83,9 +83,9 @@ namespace Northwind.DataAccess.SqlServer.Products
             command.Parameters.Add(categoryId, SqlDbType.Int);
             command.Parameters[categoryId].Value = productCategoryId;
 
-            await this.connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-            if (!await reader.ReadAsync())
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+            if (!await reader.ReadAsync().ConfigureAwait(false))
             {
                 throw new ProductCategoryNotFoundException(productCategoryId);
             }
@@ -118,7 +118,7 @@ namespace Northwind.DataAccess.SqlServer.Products
             sqlCommand.Parameters.Add(limitParameter, SqlDbType.Int);
             sqlCommand.Parameters[limitParameter].Value = limit;
 
-            return await this.ExecuteReaderAsync(sqlCommand);
+            return await this.ExecuteReaderAsync(sqlCommand).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -143,7 +143,7 @@ namespace Northwind.DataAccess.SqlServer.Products
             sqlCommand.Parameters.Add(categoriesNamesParameter, SqlDbType.NVarChar, 255);
             sqlCommand.Parameters[categoriesNamesParameter].Value = string.Join(", ", productCategoryNames);
 
-            return await this.ExecuteReaderAsync(sqlCommand);
+            return await this.ExecuteReaderAsync(sqlCommand).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -163,11 +163,11 @@ namespace Northwind.DataAccess.SqlServer.Products
 
             const string categoryId = "@categoryId";
             command.Parameters.Add(categoryId, SqlDbType.Int);
-            command.Parameters[categoryId].Value = productCategory.Id;
+            command.Parameters[categoryId].Value = productCategory.CategoryId;
 
-            await this.connection.OpenAsync();
-            var result = await command.ExecuteScalarAsync();
-            await this.connection.CloseAsync();
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+            await this.connection.CloseAsync().ConfigureAwait(false);
             return (int)result > 0;
         }
 
@@ -194,8 +194,8 @@ namespace Northwind.DataAccess.SqlServer.Products
 
             return new ProductCategoryTransferObject
             {
-                Id = id,
-                Name = name,
+                CategoryId = id,
+                CategoryName = name,
                 Description = description,
                 Picture = picture,
             };
@@ -205,7 +205,7 @@ namespace Northwind.DataAccess.SqlServer.Products
         {
             const string categoryNameParameter = "@categoryName";
             command.Parameters.Add(categoryNameParameter, SqlDbType.NVarChar, 15);
-            command.Parameters[categoryNameParameter].Value = productCategory.Name;
+            command.Parameters[categoryNameParameter].Value = productCategory.CategoryName;
 
             const string descriptionParameter = "@description";
             command.Parameters.Add(descriptionParameter, SqlDbType.NText);
@@ -237,10 +237,10 @@ namespace Northwind.DataAccess.SqlServer.Products
         private async Task<IList<ProductCategoryTransferObject>> ExecuteReaderAsync(SqlCommand command)
         {
             var productCategories = new List<ProductCategoryTransferObject>();
-            
-            await this.connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-            while (await reader.ReadAsync())
+
+            await this.connection.OpenAsync().ConfigureAwait(false);
+            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection).ConfigureAwait(false);
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 productCategories.Add(CreateProductCategory(reader));
             }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Northwind.Services.Models;
 
 namespace Northwind.Services.Products
 {
@@ -13,8 +14,8 @@ namespace Northwind.Services.Products
         /// </summary>
         /// <param name="offset">An offset of the first element to return.</param>
         /// <param name="limit">A limit of elements to return.</param>
-        /// <returns>A <see cref="IList{T}"/> of <see cref="ProductCategory"/>.</returns>
-        Task<IList<ProductCategory>> ShowCategoriesAsync(int offset, int limit);
+        /// <returns>A <see cref="IList{T}"/> of <see cref="Category"/>.</returns>
+        Task<IList<Category>> ShowCategoriesAsync(int offset, int limit);
 
         /// <summary>
         /// Try to show a product category with specified identifier.
@@ -22,14 +23,14 @@ namespace Northwind.Services.Products
         /// <param name="categoryId">A product category identifier.</param>
         /// <param name="productCategory">A product category to return.</param>
         /// <returns>Returns true if a product category is returned; otherwise false.</returns>
-        bool TryShowCategory(int categoryId, out ProductCategory productCategory);
+        bool TryShowCategory(int categoryId, out Category productCategory);
 
         /// <summary>
         /// Creates a new product category.
         /// </summary>
-        /// <param name="productCategory">A <see cref="ProductCategory"/> to create.</param>
+        /// <param name="productCategory">A <see cref="Category"/> to create.</param>
         /// <returns>An identifier of a created product category.</returns>
-        Task<int> CreateCategoryAsync(ProductCategory productCategory);
+        Task<int> CreateCategoryAsync(Category productCategory);
 
         /// <summary>
         /// Destroys an existed product category.
@@ -43,14 +44,14 @@ namespace Northwind.Services.Products
         /// </summary>
         /// <param name="names">A list of product category names.</param>
         /// <returns>A list of product categories with specified names.</returns>
-        Task<IList<ProductCategory>> LookupCategoriesByNameAsync(IList<string> names);
+        Task<IList<Category>> LookupCategoriesByNameAsync(IList<string> names);
 
         /// <summary>
         /// Updates a product category.
         /// </summary>
         /// <param name="categoryId">A product category identifier.</param>
-        /// <param name="productCategory">A <see cref="ProductCategory"/>.</param>
+        /// <param name="productCategory">A <see cref="Category"/>.</param>
         /// <returns>True if a product category is updated; otherwise false.</returns>
-        Task<bool> UpdateCategoryAsync(int categoryId, ProductCategory productCategory);
+        Task<bool> UpdateCategoryAsync(int categoryId, Category productCategory);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Northwind.Services.Models;
 
 namespace Northwind.Services.Products
 {
@@ -14,7 +15,7 @@ namespace Northwind.Services.Products
         /// <param name="offset">An offset of the first element to return.</param>
         /// <param name="limit">A limit of elements to return.</param>
         /// <returns>A <see cref="IList{T}"/> of <see cref="Product"/>.</returns>
-        Task<IList<Product>> ShowProductsAsync(int offset, int limit);
+        Task<IList<Models.Product>> ShowProductsAsync(int offset, int limit);
 
         /// <summary>
         /// Try to show a product with specified identifier.

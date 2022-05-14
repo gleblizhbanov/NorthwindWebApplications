@@ -1,19 +1,19 @@
-﻿namespace Northwind.Services.Products
+﻿namespace Northwind.Services.Models
 {
     /// <summary>
     /// Represents a product category.
     /// </summary>
-    public class ProductCategory
+    public class Category
     {
         /// <summary>
         /// Gets or sets a product category identifier.
         /// </summary>
-        public int Id { get; set; }
+        public int CategoryId { get; set; }
 
         /// <summary>
         /// Gets or sets a product category name.
         /// </summary>
-        public string Name { get; set; }
+        public string CategoryName { get; set; }
 
         /// <summary>
         /// Gets or sets a product category description.

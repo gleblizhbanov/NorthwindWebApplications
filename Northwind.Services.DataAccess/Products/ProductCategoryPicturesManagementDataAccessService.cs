@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Northwind.DataAccess;
 using Northwind.DataAccess.Products;
@@ -14,7 +16,7 @@ namespace Northwind.Services.DataAccess.Products
         private readonly IProductCategoryDataAccessObject productCategoryDataAccessObject;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ProductCategoriesManagementDataAccessService"/> class.
+        /// Initializes a new instance of the <see cref="ProductCategoryPicturesManagementDataAccessService"/> class.
         /// </summary>
         /// <param name="dataAccessFactory">A Northwind data access factory.</param>
         public ProductCategoryPicturesManagementDataAccessService(NorthwindDataAccessFactory dataAccessFactory)
@@ -25,24 +27,22 @@ namespace Northwind.Services.DataAccess.Products
         /// <inheritdoc/>
         public bool TryShowPicture(int categoryId, out byte[] bytes)
         {
-            Task<ProductCategoryTransferObject> categoryTask;
+            var categoryTask = this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId);
             try
             {
-                categoryTask = this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId);
+                bytes = categoryTask.Result.Picture;
             }
-            catch (ProductCategoryNotFoundException)
+            catch (AggregateException ex)
             {
-                bytes = null;
-                return false;
+                if (ex.InnerExceptions.Any(e => e.GetType() == typeof(ProductCategoryNotFoundException)))
+                {
+                    bytes = null;
+                    return false;
+                }
+
+                throw;
             }
 
-            if (categoryTask is null)
-            {
-                bytes = null;
-                return false;
-            }
-            
-            bytes = categoryTask.Result.Picture;
             return true;
         }
 
@@ -52,7 +52,7 @@ namespace Northwind.Services.DataAccess.Products
             ProductCategoryTransferObject category;
             try
             {
-                category = await this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId);
+                category = await this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId).ConfigureAwait(false);
             }
             catch (ProductCategoryNotFoundException)
             {
@@ -65,9 +65,9 @@ namespace Northwind.Services.DataAccess.Products
             }
 
             await using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
+            await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
             category.Picture = memoryStream.ToArray();
-            return await this.productCategoryDataAccessObject.UpdateProductCategoryAsync(category);
+            return await this.productCategoryDataAccessObject.UpdateProductCategoryAsync(category).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -76,7 +76,7 @@ namespace Northwind.Services.DataAccess.Products
             ProductCategoryTransferObject category;
             try
             {
-                category = await this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId);
+                category = await this.productCategoryDataAccessObject.FindProductCategoryAsync(categoryId).ConfigureAwait(false);
             }
             catch (ProductCategoryNotFoundException)
             {

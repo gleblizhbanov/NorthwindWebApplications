@@ -7,10 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Northwind.DataAccess;
 using Northwind.DataAccess.SqlServer;
-using Northwind.Services;
+using Northwind.Services.Blogging;
 using Northwind.Services.DataAccess.Employees;
 using Northwind.Services.DataAccess.Products;
 using Northwind.Services.Employees;
+using Northwind.Services.EntityFrameworkCore.Blogging;
+using Northwind.Services.EntityFrameworkCore.Context;
 using Northwind.Services.Products;
 
 namespace NorthwindApiApp
@@ -42,19 +44,30 @@ namespace NorthwindApiApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new DateTimeIsoFormatJsonConverter());
+            });
+
+            services.AddMvc(options =>
+            {
+                options.SuppressAsyncSuffixInActionNames = true;
+            });
+
+            services.AddScoped(service => new SqlConnection(this.Configuration.GetConnectionString("Northwind")));
+            services.AddDbContext<NorthwindContext>(options => options.UseSqlServer(this.Configuration.GetConnectionString("Northwind")));
+            services.AddTransient<string[]>();
             services.AddTransient<IProductManagementService, ProductManagementDataAccessService>();
             services.AddTransient<IProductCategoryManagementService, ProductCategoriesManagementDataAccessService>();
             services.AddTransient<IProductCategoryPictureManagementService, ProductCategoryPicturesManagementDataAccessService>();
             services.AddTransient<IEmployeeManagementService, EmployeeManagementDataAccessService>();
             services.AddTransient<IEmployeePhotoManagementService, EmployeePhotoManagementDataAccessService>();
-
-            services.AddScoped(service => new SqlConnection(this.Configuration.GetConnectionString("Northwind")));
-
+            services.AddTransient<IBloggingService, BloggingService>();
+            services.AddTransient<IBlogArticleProductsManagementService, BlogArticleProductManagementService>();
+            services.AddTransient<IBlogCommentsManagementService, BlogCommentsManagementService>();
             services.AddTransient<NorthwindDataAccessFactory, SqlServerDataAccessFactory>();
 
-            services.AddDbContext<NorthwindContext>(builder => builder.UseInMemoryDatabase("Northwind"));
-
-            services.AddControllers();
+            //services.AddDbContext<BloggingContext>(options => options.UseInMemoryDatabase("NorthwindBlogging"));
         }
 
         /// <summary>

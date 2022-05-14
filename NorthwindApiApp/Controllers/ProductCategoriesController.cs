@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Northwind.Services.Models;
 using Northwind.Services.Products;
 
 namespace NorthwindApiApp.Controllers
 {
     /// <summary>
-    /// Represents a controller to work with product categories.
+    /// Provides a controller to work with product categories.
     /// </summary>
     [Route("api/categories")]
     [ApiController]
@@ -30,16 +32,17 @@ namespace NorthwindApiApp.Controllers
         /// <summary>
         /// Creates a new product category.
         /// </summary>
-        /// <param name="productCategory">A product category to add.</param>
+        /// <param name="category">A product category to add.</param>
         /// <returns>An action result.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateCategoryAsync(ProductCategory productCategory)
+        public async Task<IActionResult> CreateCategoryAsync(Category category)
         {
-            if (await this.productCategoryManagementService.CreateCategoryAsync(productCategory).ConfigureAwait(false) > 0)
+            int id = await this.productCategoryManagementService.CreateCategoryAsync(category).ConfigureAwait(false);
+            if (id > 0)
             {
-                return this.CreatedAtAction(nameof(this.CreateCategoryAsync), new { id = productCategory.Id }, productCategory);
+                return this.CreatedAtAction("CreateCategory", new { id }, category);
             }
 
             return this.BadRequest();
@@ -52,9 +55,9 @@ namespace NorthwindApiApp.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<ProductCategory>>> GetCategoriesAsync()
+        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesAsync()
         {
-            if (await this.productCategoryManagementService.ShowCategoriesAsync(0, int.MaxValue).ConfigureAwait(false) is not List<ProductCategory> categories)
+            if (await this.productCategoryManagementService.ShowCategoriesAsync(0, int.MaxValue).ConfigureAwait(false) is not List<Category> categories)
             {
                 return this.BadRequest();
             }
@@ -70,7 +73,7 @@ namespace NorthwindApiApp.Controllers
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ProductCategory> GetCategory(int id)
+        public ActionResult<Category> GetCategory(int id)
         {
             if (this.productCategoryManagementService.TryShowCategory(id, out var productCategory))
             {
@@ -84,19 +87,19 @@ namespace NorthwindApiApp.Controllers
         /// Updates the category with specific id.
         /// </summary>
         /// <param name="id">An id of the category.</param>
-        /// <param name="productCategory">A new product category.</param>
+        /// <param name="category">A new product category.</param>
         /// <returns>An action result.</returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateCategoryAsync(int id, ProductCategory productCategory)
+        public async Task<IActionResult> UpdateCategoryAsync(int id, Category category)
         {
-            if (productCategory is null || id != productCategory.Id)
+            if (category is null || id != category.CategoryId)
             {
                 return this.BadRequest();
             }
 
-            if (await this.productCategoryManagementService.UpdateCategoryAsync(id, productCategory).ConfigureAwait(false))
+            if (await this.productCategoryManagementService.UpdateCategoryAsync(id, category).ConfigureAwait(false))
             {
                 return this.Ok();
             }

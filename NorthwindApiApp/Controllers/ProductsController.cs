@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Northwind.Services.Models;
 using Northwind.Services.Products;
 
 namespace NorthwindApiApp.Controllers
 {
     /// <summary>
-    /// Represents a controller to work with products.
+    /// Provides a controller to work with products.
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
@@ -34,12 +35,13 @@ namespace NorthwindApiApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateProductAsync(Product product)
         {
-            if (await this.productManagementService.CreateProductAsync(product).ConfigureAwait(false) <= 0)
+            int id = await this.productManagementService.CreateProductAsync(product).ConfigureAwait(false);
+            if (id > 0)
             {
-                return this.BadRequest();
+                this.CreatedAtAction("CreateProduct", new { id }, product);
             }
 
-            return this.CreatedAtAction(nameof(this.CreateProductAsync), new { id = product.Id }, product);
+            return this.BadRequest();
         }
 
         /// <summary>
@@ -88,7 +90,7 @@ namespace NorthwindApiApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateProductAsync(int id, Product product)
         {
-            if (product is null || id != product.Id)
+            if (product is null || id != product.ProductId)
             {
                 return this.BadRequest();
             }

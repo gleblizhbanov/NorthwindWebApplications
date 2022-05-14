@@ -2,12 +2,13 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Northwind.Services.Models;
 using Northwind.Services.Employees;
 
 namespace NorthwindApiApp.Controllers
 {
     /// <summary>
-    /// Represents a controller to work with employees.
+    /// Provides a controller to work with employees.
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
@@ -20,6 +21,7 @@ namespace NorthwindApiApp.Controllers
         /// Initializes a new instance of the <see cref="EmployeesController"/> class.
         /// </summary>
         /// <param name="employeeManagementService">An employee management service.</param>
+        /// <param name="employeePhotoManagementService">An employee photo management service.</param>
         public EmployeesController(IEmployeeManagementService employeeManagementService, IEmployeePhotoManagementService employeePhotoManagementService)
         {
             this.employeeManagementService = employeeManagementService;
@@ -36,9 +38,10 @@ namespace NorthwindApiApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateEmployeeAsync(Employee employee)
         {
-            if (await this.employeeManagementService.CreateEmployeeAsync(employee).ConfigureAwait(false) > 0)
+            int id = await this.employeeManagementService.CreateEmployeeAsync(employee).ConfigureAwait(false);
+            if (id > 0)
             {
-                return this.CreatedAtAction(nameof(this.CreateEmployeeAsync), new { id = employee.Id }, employee);
+                return this.CreatedAtAction("CreateEmployee", new { id }, employee);
             }
 
             return this.BadRequest();
@@ -69,7 +72,7 @@ namespace NorthwindApiApp.Controllers
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Employee>> GetEmployeeAsync(int id)
+        public ActionResult<Employee> GetEmployee(int id)
         {
             if (this.employeeManagementService.TryShowEmployee(id, out var employee))
             {
@@ -90,7 +93,7 @@ namespace NorthwindApiApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateEmployeeAsync(int id, Employee employee)
         {
-            if (employee is null || id != employee.Id)
+            if (employee is null || id != employee.EmployeeId)
             {
                 return this.BadRequest();
             }
