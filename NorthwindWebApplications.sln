@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Northwind.Services.DataAcce
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Northwind.DataAccess.SqlServer", "Northwind.DataAccess.SqlServer\Northwind.DataAccess.SqlServer.csproj", "{88A0D9CE-D492-420D-A9C3-BFC171025D64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Northwind.Services.EntityFrameworkCore.Blogging", "Northwind.Services.EntityFrameworkCore.Blogging\Northwind.Services.EntityFrameworkCore.Blogging.csproj", "{F8C39604-D45B-4611-842B-D6FDCA2B600E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Northwind.Services.EntityFrameworkCore.Blogging", "Northwind.Services.EntityFrameworkCore.Blogging\Northwind.Services.EntityFrameworkCore.Blogging.csproj", "{F8C39604-D45B-4611-842B-D6FDCA2B600E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NorthwindMvcClient", "NorthwindMvcClient\NorthwindMvcClient.csproj", "{9C31B0C9-71C2-4C61-84E6-1F661D418AC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{F8C39604-D45B-4611-842B-D6FDCA2B600E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8C39604-D45B-4611-842B-D6FDCA2B600E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8C39604-D45B-4611-842B-D6FDCA2B600E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C31B0C9-71C2-4C61-84E6-1F661D418AC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C31B0C9-71C2-4C61-84E6-1F661D418AC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C31B0C9-71C2-4C61-84E6-1F661D418AC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C31B0C9-71C2-4C61-84E6-1F661D418AC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

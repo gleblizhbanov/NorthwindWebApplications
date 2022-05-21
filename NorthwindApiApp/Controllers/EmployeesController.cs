@@ -48,15 +48,17 @@ namespace NorthwindApiApp.Controllers
         }
 
         /// <summary>
-        /// Gets all employees.
+        /// Gets employees using specified offset and limit for pagination.
         /// </summary>
+        /// <param name="offset">An offset of the first element to return.</param>
+        /// <param name="limit">A limit of elements to return.</param>
         /// <returns>All employees.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesAsync()
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesAsync([FromQuery] int offset = 0, [FromQuery] int limit = int.MaxValue)
         {
-            if (await this.employeeManagementService.ShowEmployeesAsync(0, int.MaxValue).ConfigureAwait(false) is not List<Employee> employees)
+            if (await this.employeeManagementService.ShowEmployeesAsync(offset, limit).ConfigureAwait(false) is not List<Employee> employees)
             {
                 return this.BadRequest();
             }

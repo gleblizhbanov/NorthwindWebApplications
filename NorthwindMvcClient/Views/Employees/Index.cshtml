@@ -1,0 +1,32 @@
+﻿@model EmployeesPageViewModel
+
+<form method="get">
+    <div class="form-group form-inline"> 
+        <label>Show by: </label>
+        <select onchange="this.form.submit()" name="limit" asp-for="@Model.PageModel.PageSize" asp-items="@(new SelectList(new[]{ 3, 5, 10, 15, 20, Model.PageModel.PageSize }.OrderBy(x => x).Distinct()))" class="form-control"></select>
+    </div>
+</form>
+<table class="table">
+    <thead>
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.Employees.First().Id)</th>
+        <th>@Html.DisplayNameFor(model => model.Employees.First().FirstName)</th>
+        <th>@Html.DisplayNameFor(model => model.Employees.First().LastName)</th>
+        <th>@Html.DisplayNameFor(model => model.Employees.First().Title)</th>
+        <th>@Html.DisplayNameFor(model => model.Employees.First().Photo)</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var employee in Model.Employees)
+    {
+        <tr>
+            <td>@Html.DisplayFor(model => employee.Id)</td>
+            <td>@Html.DisplayFor(model => employee.FirstName)</td>
+            <td>@Html.DisplayFor(model => employee.LastName)</td>
+            <td>@Html.DisplayFor(model => employee.Title)</td>
+            <td>@Html.Image(employee.Photo, 60, 60, "EmployeePhoto")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+<page-link page-model="@Model.PageModel" page-action="Index"></page-link>
