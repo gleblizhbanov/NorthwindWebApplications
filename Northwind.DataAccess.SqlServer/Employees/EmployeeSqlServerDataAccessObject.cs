@@ -261,7 +261,7 @@ namespace Northwind.DataAccess.SqlServer.Employees
                 HireDate = (DateTime?)(reader["HireDate"] != DBNull.Value ? reader["HireDate"] : null),
                 Address = (string)(reader["Address"] != DBNull.Value ? reader["Address"] : null),
                 City = (string)(reader["City"] != DBNull.Value ? reader["City"] : null),
-                Region = (string)(reader["Title"] != DBNull.Value ? reader["Title"] : null),
+                Region = (string)(reader["Region"] != DBNull.Value ? reader["Region"] : null),
                 PostalCode = (string)(reader["PostalCode"] != DBNull.Value ? reader["PostalCode"] : null),
                 Country = (string)(reader["Country"] != DBNull.Value ? reader["Country"] : null),
                 HomePhone = (string)(reader["HomePhone"] != DBNull.Value ? reader["HomePhone"] : null),

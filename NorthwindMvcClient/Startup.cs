@@ -45,6 +45,10 @@ namespace NorthwindMvcClient
             {
                 endpoints.MapControllerRoute(
                     name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapControllerRoute(
+                    name: "employees",
                     pattern: "{controller=Employees}/{action=Index}/{id?}");
             });
         }

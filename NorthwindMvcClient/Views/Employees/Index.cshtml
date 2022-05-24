@@ -6,14 +6,15 @@
         <select onchange="this.form.submit()" name="limit" asp-for="@Model.PageModel.PageSize" asp-items="@(new SelectList(new[]{ 3, 5, 10, 15, 20, Model.PageModel.PageSize }.OrderBy(x => x).Distinct()))" class="form-control"></select>
     </div>
 </form>
-<table class="table">
-    <thead>
+<table class="table table-bordered table-striped">
+    <thead class="thead-light">
     <tr>
         <th>@Html.DisplayNameFor(model => model.Employees.First().Id)</th>
         <th>@Html.DisplayNameFor(model => model.Employees.First().FirstName)</th>
         <th>@Html.DisplayNameFor(model => model.Employees.First().LastName)</th>
         <th>@Html.DisplayNameFor(model => model.Employees.First().Title)</th>
         <th>@Html.DisplayNameFor(model => model.Employees.First().Photo)</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -25,6 +26,11 @@
             <td>@Html.DisplayFor(model => employee.LastName)</td>
             <td>@Html.DisplayFor(model => employee.Title)</td>
             <td>@Html.Image(employee.Photo, 60, 60, "EmployeePhoto")</td>
+            <td>
+                <a asp-controller="Employees" asp-action="Details" asp-route-id="@employee.Id" class="btn btn-primary" role="button"><i class="far fa-eye"></i></a>
+                <a asp-controller="Employees" asp-action="Edit" asp-route-id="@employee.Id" class="btn btn-success" role="button"><i class="fas fa-edit"></i></a>
+                <a asp-controller="Employees" asp-action="Delete" asp-route-id="@employee.Id" class="btn btn-danger" role="button"><i class="far fa-trash-alt"></i></a>
+            </td>
         </tr>
     }
     </tbody>

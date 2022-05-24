@@ -8,6 +8,10 @@ namespace NorthwindMvcClient.ViewModels
     /// </summary>
     public class EmployeeViewModel
     {
+        public EmployeeViewModel()
+        {
+        }
+
         public EmployeeViewModel(Employee employee)
         {
             this.Id = employee.EmployeeId;

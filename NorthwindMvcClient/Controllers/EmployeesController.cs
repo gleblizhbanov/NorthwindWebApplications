@@ -11,6 +11,7 @@ using NorthwindMvcClient.ViewModels;
 
 namespace NorthwindMvcClient.Controllers
 {
+    [Route("[controller]/")]
     public class EmployeesController : Controller
     {
         private readonly HttpClient client;
@@ -19,7 +20,7 @@ namespace NorthwindMvcClient.Controllers
         {
             this.client = new HttpClient()
             {
-                BaseAddress = new Uri("https://localhost:44344/api/Employees"),
+                BaseAddress = new Uri("https://localhost:44344/api/Employees/"),
             };
 
             this.client.DefaultRequestHeaders.Accept.Clear();
@@ -42,7 +43,7 @@ namespace NorthwindMvcClient.Controllers
 
             uriBuilder.Query = string.Join('&', query.Select(parameter => $"{parameter.Key}={parameter.Value}"));
             
-            var json = await this.client.GetStringAsync(uriBuilder.Uri);
+            var json = await this.client.GetStringAsync(uriBuilder.Uri).ConfigureAwait(false);
             var employees = JsonConvert.DeserializeObject<IList<Employee>>(json)
                                                         .Select(employee => new EmployeeViewModel(employee))
                                                         .ToList();
@@ -52,7 +53,7 @@ namespace NorthwindMvcClient.Controllers
                 return limit != PageViewModel.BasePageSize ? RedirectToAction(nameof(Index), new { limit }) : RedirectToAction(nameof(Index));
             }
 
-            int totalCount = JsonConvert.DeserializeObject<IList<Employee>>(await this.client.GetStringAsync("")).Count;
+            int totalCount = JsonConvert.DeserializeObject<IList<Employee>>(await this.client.GetStringAsync("").ConfigureAwait(false)).Count;
 
             ViewData["Title"] = "Employees";
             return View(new EmployeesPageViewModel()
@@ -60,6 +61,26 @@ namespace NorthwindMvcClient.Controllers
                 Employees = employees,
                 PageModel = new PageViewModel(totalCount, page, limit),
             });
+        }
+        
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            if (id <= 0)
+            {
+                return NotFound();
+            }
+
+            var json = await this.client.GetStringAsync($"{id}");
+            var employee = JsonConvert.DeserializeObject<EmployeeDetailsViewModel>(json);
+
+            return View(employee);
+        }
+        
+        [HttpGet("{id:int}/edit")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            return Ok();
         }
     }
 }
